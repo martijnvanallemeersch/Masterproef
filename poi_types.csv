@@ -124,7 +124,7 @@ id;name;child_ids
 142;"[{""nl"" : ""Synagoge""}, {""en"" : ""Synagoge""}, {""fr"" : ""Synagoge""}, {""de"" : ""Synagoge""}, {""es"" : ""Sinagoga""}, {""ca"" : ""Sinagoga""}]";
 143;"[{""nl"" : ""Belfort""}, {""en"" : ""Belfrey""}, {""de"" : ""Belfried""}, {""es"" : ""Campanario""}, {""ca"" : ""Campanar""}, {""fr"" : ""beffroi""}]";
 144;"[{""nl"" : ""Wegwijzer""}, {""en"" : ""Signpost""}, {""fr"" : ""Poteau indicateur""}, {""de"" : ""Wegweiser""}, {""es"" : ""Señal""}, {""ca"" : ""Senyal""}]";
-145;"[{""nl"" : ""Gebedsplaats""}, {""en"" : ""Place of worship""}, {""fr"" : ""Endroits pour prier""}, {""de"" : ""Ort der Verehrung""}, {""es"" : ""Lugar de culto""}, {""ca"" : ""Lloc de culte""}]";[129, 130, 131, 142, 157, 158, 159, 160, 161, 162, 164, 238, 382, 450, 466]
+145;"[{""nl"" : ""Gebedsplaats""}, {""en"" : ""Place of worship""}, {""fr"" : ""Endroits pour prier""}, {""de"" : ""Ort der Verehrung""}, {""es"" : ""Lugar de culto""}, {""ca"" : ""Lloc de culte""}]";[129, 130, 131, 142, 158, 159, 160, 161, 162, 164, 238, 382, 450, 466]
 146;"[{""nl"" : ""Windmolen""}, {""en"" : ""Windmill""}, {""fr"" : ""Moulins à vent""}, {""de"" : ""Windmühle""}, {""es"" : ""Molino de viento""}, {""ca"" : ""Molí de vent""}]";[147, 148]
 147;"[{""nl"" : ""Windmolen (Oud)""}, {""en"" : ""Windmill (old)""}, {""fr"" : ""Vieux moulins à vent""}, {""de"" : ""Windmühlen (altes)""}, {""es"" : ""Molino de viento antiguo""}, {""ca"" : ""Molí de vent antic""}]";
 148;"[{""nl"" : ""Windmolen (Nieuw)""}, {""en"" : ""Windmill (new)""}, {""fr"" : ""Nouveaux moulins à vent""}, {""de"" : ""Windmühlen (neues)""}, {""es"" : ""Molino de viento nuevo""}, {""ca"" : ""Molí de vent nou""}]";

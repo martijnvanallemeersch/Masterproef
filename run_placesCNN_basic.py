@@ -82,16 +82,28 @@ class Resultaat:
     self.falseNeg = 0
     self.falsePos = 0
 
+GeneralTypeID_dict = {}
 POITypes = dict()
 Childs = dict()
+Parent = dict()
+
+class resPlaces(object):
+    def __init__(self, data,percentage):
+        self.data = data
+        self.percentage = percentage
 
 class Node(object):
     def __init__(self, data):
         self.data = data
         self.children = []
+        self.parent = []
+
 
     def add_child(self, obj):
         self.children.append(obj)
+
+    def add_parent(self, obj):
+        self.parent = obj
 
 def addType(id, value):
     if id in POITypes:
@@ -104,6 +116,9 @@ def addChilds(id, value):
         print('error')
     else:
         Childs[id] = value
+
+def addParent(id, value):
+    Parent[id] = value
 
 def GenerateTreePOI():
 
@@ -126,13 +141,14 @@ def GenerateTreePOI():
 
                 jsonObject = json.loads(res)
 
-                engelseVertaling = ""
+                englishTranslation = ""
                 for i in jsonObject:
                     if i.get('en'):
-                        engelseVertaling = i.get('en')
+                        englishTranslation = i.get('en')
 
-                addType(data_line[0],Node(engelseVertaling))
-                addChilds(data_line[0],data_line[2])
+                addType(data_line[0],Node(englishTranslation.lower()))
+                addChilds(data_line[0],data_line[2].lower())
+                GeneralTypeID_dict[str(englishTranslation).lower()] = data_line[0]
                 line_count += 1
 
     for childId in Childs:
@@ -141,10 +157,56 @@ def GenerateTreePOI():
 
             for integ in test:
                 POITypes.get(str(childId)).add_child(POITypes.get(str(integ)))
-
+                POITypes.get(str(integ)).add_parent(POITypes.get(str(childId)))
     print("Tree build")
     return
 
+def evaluate(resultPlaces):
+    perc = resultPlaces[0].percentage
+    indexObjectNul = 0
+
+    if(perc > 0.35):
+        if (resultPlaces[0].data != None):
+            return resultPlaces[0]
+        else:
+            perc = 0
+
+    objectNul = resultPlaces[indexObjectNul].data
+    #if(objectNul != None):
+    while(perc < 0.35):
+        if (objectNul != None):
+            if(objectNul.data != "poi"):
+                perc = resultPlaces[indexObjectNul].percentage
+                for i in range(indexObjectNul+1, 5):
+                    if(resultPlaces[i].data != None):
+                        object = resultPlaces[i].data
+                        while(object.data != "poi"):
+                            if(objectNul == object):
+                                perc = perc + resultPlaces[i].percentage
+                                break
+                            else :
+                                object = object.parent
+                if(perc < 0.35):
+                    objectNul = objectNul.parent
+            else:
+                while True:
+                    indexObjectNul = indexObjectNul + 1
+                    objectNul = resultPlaces[indexObjectNul].data
+                    perc = resultPlaces[indexObjectNul].percentage
+                    if(indexObjectNul == 2):
+                        return -1
+                    break
+        else:
+            while True:
+                indexObjectNul = indexObjectNul + 1
+                objectNul = resultPlaces[indexObjectNul].data
+                perc = resultPlaces[indexObjectNul].percentage
+                if (indexObjectNul == 2):
+                    return -1
+                break
+        # else:
+        #     return -1
+    return resPlaces(objectNul,perc)
 
 resultaatList = []
 
@@ -173,6 +235,8 @@ for file in onlyfiles:
 
             print('{} prediction on {}'.format(arch, file))
 
+            resultPlaces = []
+
             check = 0
             juistCheck = 0
             nietGevondenCheck = 0
@@ -194,186 +258,38 @@ for file in onlyfiles:
 
                 result = result + "_" + classes[idx[i]]
 
-                if((classes[idx[i]] == ("cathedral"))):
-                    klasse.append("Kerk")
-                    klasse.append("Kathedraal")
-                    klasse.append("Kapel")
+                #todo
+                #Sommige classes uit de categorie_places365.txt bevatten categorien zoals church/outside
+                #voorlopig neem ik gewoon het eerste deel daarvan/ in de toekomst nog wijzigen
+                classes_split = classes[idx[i]].split("/")
 
-                    falsePos.append("Huis")
-                    falsePos.append("Gebouw")
-                    falsePos.append("Herenhuis")
-                    falsePos.append("Historisch gebouw")
-                    falsePos.append("Burcht")
+                resultPlaces.append(resPlaces(POITypes.get(GeneralTypeID_dict.get(classes_split[0])),float('{:.3f}'.format(probs[i]))))
 
-                    check = 1
-                elif((classes[idx[i]] == ("church/indoor"))):
-                    klasse.append("Kerk")
-                    klasse.append("Kathedraal")
-                    klasse.append("Kapel")
+            resEvaluate = evaluate(resultPlaces)
 
-                    falsePos.append("Huis")
-                    falsePos.append("Gebouw")
-                    falsePos.append("Herenhuis")
-                    falsePos.append("Historisch gebouw")
-                    falsePos.append("Burcht")
+            if(resEvaluate == -1):
+                #geen goede match gevonden
+                print('geen goed match gevonden')
 
-                    check = 1
-                elif ((classes[idx[i]] == ("church/outdoor"))):
-                    klasse.append("Kerk")
-                    klasse.append("Kathedraal")
-                    klasse.append("Kapel")
 
-                    falsePos.append("Huis")
-                    falsePos.append("Gebouw")
-                    falsePos.append("Herenhuis")
-                    falsePos.append("Historisch gebouw")
-                    falsePos.append("Burcht")
+            else:
+                #goede match gevonden :)
+                if(resEvaluate.data != None):
+                    print('Categorie ' + resEvaluate.data.data)
 
-                    check = 1
-                elif ((classes[idx[i]] == ("bridge"))):
-                    klasse.append("Brug")
-                    check = 1
-                elif ((classes[idx[i]] == ("building_facade"))):
+                    newpath = 'C:\\Users\\marti\\Documents\\Kuleuven\\Masterjaar\\Masterproef\\fotos-pieter\\fotos\\' + resEvaluate.data.data + '\\'
+                    if not os.path.exists(newpath):
+                        os.makedirs(newpath)
 
-                    klasse.append("Huis")
-                    klasse.append("Gebouw")
-                    klasse.append("Herenhuis")
-                    klasse.append("Stadhuis")
-
-                    falseNeg.append("Kerk")
-                    falseNeg.append("Kathedraal")
-                    falseNeg.append("Kapel")
-                    falseNeg.append("Abdij")
-                    falseNeg.append("Burcht")
-
-                    check = 1
-                elif ((classes[idx[i]] == ("castle"))):
-                    klasse.append("Kasteel")
-                    klasse.append("Burcht")
-                    klasse.append("Vesting")
-
-                    falsePos.append("Huis")
-                    falsePos.append("Gebouw")
-                    falsePos.append("Herenhuis")
-                    falsePos.append("Historisch gebouw")
-
-                    check = 1
-                elif ((classes[idx[i]] == ("palace"))):
-                    klasse.append("Kasteel")
-                    klasse.append("Burcht")
-                    klasse.append("Vesting")
-
-                    falsePos.append("Huis")
-                    falsePos.append("Gebouw")
-                    falsePos.append("Herenhuis")
-                    falsePos.append("Historisch gebouw")
-                    check = 1
-
-                elif ((classes[idx[i]] == ("tower"))):
-                    klasse.append("Belfort")
-
-                    falsePos.append("Huis")
-                    falsePos.append("Gebouw")
-                    falsePos.append("Herenhuis")
-                    falsePos.append("Historisch gebouw")
-
-                    falseNeg.append("Kathedraal")
-                    falseNeg.append("Kerk")
-
-                    check = 1
-
-                elif ((classes[idx[i]] == ("canal/urban"))):
-                    klasse.append("Kanaal")
-                    klasse.append("Kolk")
-
-                    falseNeg.append("Brug")
-                    check = 1
-
-                elif ((classes[idx[i]] == ("canal/natural"))):
-                    klasse.append("Kanaal")
-                    klasse.append("Kolk")
-
-                    falseNeg.append("Brug")
-                    check = 1
-
-                elif ((classes[idx[i]] == ("moat/water"))):
-                    klasse.append("Kanaal")
-                    klasse.append("Kolk")
-
-                    falseNeg.append("Brug")
-                    falseNeg.append("Burcht")
-                    check = 1
-
-                if(check == 1):
-                    break
+                    os.rename(
+                        'C:\\Users\\marti\\Documents\\Kuleuven\\Masterjaar\\Masterproef\\fotos-pieter\\fotos\\' + file,
+                        newpath + file)
+                else:
+                    print('Errorr')
 
 
 
-            for kl in klasse:
-                if(file.find(kl) != -1):
-                    juist = juist + 1
-                    juistCheck = 1
-                    checkResult = 1
-                    break;
-
-            for fp in falsePos:
-                if (file.find(fp) != -1):
-                    falsePosTeller = falsePosTeller + 1
-                    falsePosCheck = 1
-                    checkResult = 1
-                    break;
-
-            for fn in falseNeg:
-                if (file.find(fn) != -1):
-                    falseNegTeller = falseNegTeller + 1
-                    falseNegCheck = 1
-                    checkResult = 1
-                    break;
-
-            if(checkResult == 0):
-                nietGevonden = nietGevonden + 1
-                nietGevondenCheck = 1
-
-            resultDir = ""
-
-            gesplit = file.split("_")
-            typeBestaatCheck = 0
-
-            for result in resultaatList:
-                if (result.type == gesplit[0]):
-                    typeBestaatCheck = 1
-
-            if (typeBestaatCheck == 0):
-                resultaatList.append(Resultaat(gesplit[0]))
-
-            for result in resultaatList:
-                if (result.type == gesplit[0]):
-                    if (juistCheck == 1):
-                        result.juist = result.juist + 1
-                    elif (falsePosCheck == 1):
-                        result.falsePos = result.falsePos + 1
-                    elif (falseNegCheck == 1):
-                        result.falseNeg = result.falseNeg + 1
-                    elif (nietGevondenCheck == 1):
-                        result.fout = result.fout + 1
-
-                    result.aantal = result.aantal + 1
-
-            if(falsePosCheck == 1):
-                resultDir = "falsePos"
-            if (falseNegCheck == 1):
-                resultDir = "falseNeg"
-            if (nietGevondenCheck == 1):
-                resultDir = "nietGevonden"
-
-            if(juistCheck != 1):
-                newpath = 'C:\\Users\\marti\\Documents\\Kuleuven\\Masterjaar\\Masterproef\\fotos-pieter\\fotos\\' + resultDir + '\\'
-                if not os.path.exists(newpath):
-                    os.makedirs(newpath)
-
-                os.rename('C:\\Users\\marti\\Documents\\Kuleuven\\Masterjaar\\Masterproef\\fotos-pieter\\fotos\\' + file, newpath + file)
-
-        except() :
+        except():
             print("Error")
 
 
