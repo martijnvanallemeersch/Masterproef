@@ -6,7 +6,7 @@
 /a/amphitheater 5
 /a/amusement_arcade 6
 /a/amusement_park 7
-/a/building 8
+/a/building/apartment_building/outdoor 8
 /a/aquarium 9
 /a/aqueduct 10
 /a/arcade 11
@@ -105,7 +105,7 @@
 /c/corn_field 104
 /c/corral 105
 /c/corridor 106
-/c/house 107
+/c/house/cottage 107
 /c/courthouse 108
 /c/courtyard 109
 /c/creek 110
@@ -130,7 +130,7 @@
 /e/elevator/door 129
 /e/elevator_lobby 130
 /e/elevator_shaft 131
-/e/building 132
+/e/building/embassy 132
 /e/engine_room 133
 /e/entrance_hall 134
 /e/escalator/indoor 135
@@ -191,7 +191,7 @@
 /i/iceberg 190
 /i/igloo 191
 /i/industrial_area 192
-/i/building 193
+/i/building/inn/outdoor 193
 /i/islet 194
 /j/jacuzzi/indoor 195
 /j/jail_cell 196
@@ -211,14 +211,14 @@
 /l/lecture_room 210
 /l/legislative_chamber 211
 /l/library/indoor 212
-/l/building 213
+/l/building/library/outdoor 213
 /l/lighthouse 214
 /l/living_room 215
 /l/structure/loading_dock 216
 /l/lobby 217
 /l/bridge/lock_chamber 218
 /l/locker_room 219
-/m/house 220
+/m/house/mansion 220
 /m/manufactured_home 221
 /m/market/indoor 222
 /m/market/outdoor 223

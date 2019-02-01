@@ -208,6 +208,8 @@ def evaluate(resultPlaces):
         #     return -1
     return resPlaces(objectNul,perc)
 
+
+
 resultaatList = []
 
 GenerateTreePOI()
@@ -267,6 +269,16 @@ for file in onlyfiles:
 
             resEvaluate = evaluate(resultPlaces)
 
+            check = 0
+            juistCheck = 0
+            nietGevondenCheck = 0
+            falseNegCheck = 0
+            falsePosCheck = 0
+            checkResult = 0
+            klasse = []
+            falseNeg = []
+            falsePos = []
+
             if(resEvaluate == -1):
                 #geen goede match gevonden
                 print('geen goed match gevonden')
@@ -275,22 +287,282 @@ for file in onlyfiles:
             else:
                 #goede match gevonden :)
                 if(resEvaluate.data != None):
+
+                    if ((resEvaluate.data.data.find("cathedral") != -1)):
+                        klasse.append("Kerk")
+                        klasse.append("Kathedraal")
+                        klasse.append("Kapel")
+                        klasse.append("POI")
+                        klasse.append("Foto-stopplaats")
+
+
+                        falsePos.append("Huis")
+                        falsePos.append("Gebouw")
+                        falsePos.append("Herenhuis")
+                        falsePos.append("Historisch gebouw")
+                        falsePos.append("Burcht")
+
+                        check = 1
+                    elif ((resEvaluate.data.data.find("church") != -1)):
+                        klasse.append("Kerk")
+                        klasse.append("Kathedraal")
+                        klasse.append("Kapel")
+                        klasse.append("POI")
+                        klasse.append("Foto-stopplaats")
+
+
+                        falsePos.append("Huis")
+                        falsePos.append("Gebouw")
+                        falsePos.append("Herenhuis")
+                        falsePos.append("Historisch gebouw")
+                        falsePos.append("Burcht")
+
+                        check = 1
+
+                    elif (resEvaluate.data.data.find("bridge") != -1):
+                        klasse.append("Brug")
+                        klasse.append("POI")
+                        klasse.append("Foto-stopplaats")
+
+
+                        check = 1
+                    elif (resEvaluate.data.data.find("building") != -1):
+
+                        klasse.append("Huis")
+                        klasse.append("Gebouw")
+                        klasse.append("Herenhuis")
+                        klasse.append("Herenwoonst")
+                        klasse.append("Stadhuis")
+                        klasse.append("Kantoorgebouw")
+                        klasse.append("POI")
+                        klasse.append("Foto-stopplaats")
+
+                        falseNeg.append("Kerk")
+                        falseNeg.append("Kathedraal")
+                        falseNeg.append("Kapel")
+                        falseNeg.append("Abdij")
+                        falseNeg.append("Burcht")
+                        falseNeg.append("B&B")
+                        falseNeg.append("Boekenwinkel")
+                        falseNeg.append("Cafe")
+                        falseNeg.append("Architecturale plaats")
+                        falseNeg.append("Begijnhof")
+                        falseNeg.append("Museum")
+                        falseNeg.append("School")
+                        falseNeg.append("Voetbalstadion")
+
+
+
+
+
+                    elif (resEvaluate.data.data.find("house") != -1):
+
+                        klasse.append("Huis")
+                        klasse.append("Gebouw")
+                        klasse.append("Herenhuis")
+                        klasse.append("Herenwoonst")
+                        klasse.append("Stadhuis")
+                        klasse.append("POI")
+                        klasse.append("Foto-stopplaats")
+
+                        falseNeg.append("Kerk")
+                        falseNeg.append("Kathedraal")
+                        falseNeg.append("Kapel")
+                        falseNeg.append("Abdij")
+                        falseNeg.append("Burcht")
+                        falseNeg.append("B&B")
+                        falseNeg.append("Boekenwinkel")
+                        falseNeg.append("Cafe")
+                        falseNeg.append("Architecturale plaats")
+                        falseNeg.append("Begijnhof")
+                        falseNeg.append("Museum")
+
+                    elif (resEvaluate.data.data.find("stadium") != -1):
+
+                        klasse.append("Voetbalstadion")
+                        klasse.append("POI")
+                        klasse.append("Foto-stopplaats")
+
+                        check = 1
+                    elif (resEvaluate.data.data.find("castle") != -1):
+                        klasse.append("Kasteel")
+                        klasse.append("Burcht")
+                        klasse.append("Vesting")
+                        klasse.append("POI")
+                        klasse.append("Foto-stopplaats")
+
+                        falsePos.append("Huis")
+                        falsePos.append("Gebouw")
+                        falsePos.append("Herenhuis")
+                        falsePos.append("Historisch gebouw")
+
+                        check = 1
+                    elif (resEvaluate.data.data.find("palace")!= -1):
+                        klasse.append("Kasteel")
+                        klasse.append("Burcht")
+                        klasse.append("Vesting")
+                        klasse.append("POI")
+                        klasse.append("Foto-stopplaats")
+
+                        falsePos.append("Huis")
+                        falsePos.append("Gebouw")
+                        falsePos.append("Herenhuis")
+                        falsePos.append("Historisch gebouw")
+                        check = 1
+
+                    elif (resEvaluate.data.data.find("tower")!= -1):
+                        klasse.append("Belfort")
+                        klasse.append("POI")
+                        klasse.append("Foto-stopplaats")
+
+                        falsePos.append("Huis")
+                        falsePos.append("Gebouw")
+                        falsePos.append("Herenhuis")
+                        falsePos.append("Historisch gebouw")
+
+                        falseNeg.append("Kathedraal")
+                        falseNeg.append("Kerk")
+
+                        check = 1
+
+                    elif (resEvaluate.data.data.find("canal")!= -1):
+                        klasse.append("Kanaal")
+                        klasse.append("Kolk")
+                        klasse.append("Water")
+                        klasse.append("POI")
+                        klasse.append("Foto-stopplaats")
+
+
+                        falseNeg.append("Brug")
+                        check = 1
+
+                    elif (resEvaluate.data.data.find("moat/water") != -1):
+                        klasse.append("Kanaal")
+                        klasse.append("Kolk")
+                        klasse.append("POI")
+                        klasse.append("Foto-stopplaats")
+
+                        falseNeg.append("Brug")
+                        falseNeg.append("Burcht")
+                        check = 1
+
+                    elif (resEvaluate.data.data.find("structure") != -1):
+
+                        klasse.append("POI")
+                        klasse.append("Foto-stopplaats")
+
+                        falseNeg.append("Brug")
+                        falseNeg.append("Burcht")
+                        falseNeg.append("Huis")
+                        falseNeg.append("Gebouw")
+                        falseNeg.append("Herenhuis")
+                        falseNeg.append("Historisch gebouw")
+                        falseNeg.append("Kasteel")
+                        falseNeg.append("Vesting")
+                        falseNeg.append("Kerk")
+                        falseNeg.append("Kathedraal")
+                        falseNeg.append("Kapel")
+                        falseNeg.append("Abdij")
+                        falseNeg.append("Burcht")
+                        falseNeg.append("B&B")
+                        falseNeg.append("Boekenwinkel")
+                        falseNeg.append("Cafe")
+                        falseNeg.append("Architecturale plaats")
+                        falseNeg.append("Belfort")
+
+                        check = 1
+
+                    else:
+                        klasse.append("POI")
+                        klasse.append("Foto-stopplaats")
+
+                    for kl in klasse:
+                        if (file.find(kl) != -1):
+                            juist = juist + 1
+                            juistCheck = 1
+                            checkResult = 1
+                            break;
+
+                    for fp in falsePos:
+                        if (file.find(fp) != -1):
+                            falsePosTeller = falsePosTeller + 1
+                            falsePosCheck = 1
+                            checkResult = 1
+                            break;
+
+                    for fn in falseNeg:
+                        if (file.find(fn) != -1):
+                            falseNegTeller = falseNegTeller + 1
+                            falseNegCheck = 1
+                            checkResult = 1
+                            break;
+
+                    if (checkResult == 0):
+                        nietGevonden = nietGevonden + 1
+                        nietGevondenCheck = 1
+
                     print('Categorie ' + resEvaluate.data.data)
 
-                    newpath = 'C:\\Users\\marti\\Documents\\Kuleuven\\Masterjaar\\Masterproef\\fotos-pieter\\fotos\\' + resEvaluate.data.data + '\\'
+                    resultDir = ""
+
+                    gesplit = file.split("_")
+                    typeBestaatCheck = 0
+
+                    for result in resultaatList:
+                        if (result.type == gesplit[0]):
+                            typeBestaatCheck = 1
+
+                    if (typeBestaatCheck == 0):
+                        resultaatList.append(Resultaat(gesplit[0]))
+
+                    for result in resultaatList:
+                        if (result.type == gesplit[0]):
+                            if (juistCheck == 1):
+                                result.juist = result.juist + 1
+                            elif (falsePosCheck == 1):
+                                result.falsePos = result.falsePos + 1
+                            elif (falseNegCheck == 1):
+                                result.falseNeg = result.falseNeg + 1
+                            elif (nietGevondenCheck == 1):
+                                result.fout = result.fout + 1
+
+                            result.aantal = result.aantal + 1
+
+                    if (falsePosCheck == 1):
+                        resultDir = "falsePos"
+                    if (falseNegCheck == 1):
+                        resultDir = "falseNeg"
+                    if (nietGevondenCheck == 1):
+                        resultDir = "nietGevonden"
+
+                    if (juistCheck == 1):
+                        resultDir = "juist"
+
+                    # if (juistCheck != 1):
+                    #     newpath = 'C:\\Users\\marti\\Documents\\Kuleuven\\Masterjaar\\Masterproef\\fotos-pieter\\fotos\\' + resultDir + '\\'
+                    #     if not os.path.exists(newpath):
+                    #         os.makedirs(newpath)
+                    #
+                    #     os.rename(
+                    #         'C:\\Users\\marti\\Documents\\Kuleuven\\Masterjaar\\Masterproef\\fotos-pieter\\fotos\\' + file,
+                    #         newpath + file)
+
+                    newpath = 'C:\\Users\\marti\\Documents\\Kuleuven\\Masterjaar\\Masterproef\\fotos-pieter\\fotos\\' + resultDir + '\\'
                     if not os.path.exists(newpath):
                         os.makedirs(newpath)
 
                     os.rename(
                         'C:\\Users\\marti\\Documents\\Kuleuven\\Masterjaar\\Masterproef\\fotos-pieter\\fotos\\' + file,
                         newpath + file)
+
+
                 else:
                     print('Errorr')
 
 
 
-        except():
-            print("Error")
+        except:
+            print("Error met file " + file)
 
 
         # if (gesplit[0] == "Abdij"):
@@ -312,22 +584,26 @@ for file in onlyfiles:
         #         # false neg
 
 index_excel = 2
-for res in resultaatList:
-    print('type : {%s} juist -> {%s} , falsePos -> {%s}, falseNeg -> {%s}, niet gevonden -> {%s}'%(res.type, res.juist,res.falsePos,res.falseNeg,res.fout))
+
+try:
+    for res in resultaatList:
+        print('type : {%s} juist -> {%s} , falsePos -> {%s}, falseNeg -> {%s}, niet gevonden -> {%s}'%(res.type, res.juist,res.falsePos,res.falseNeg,res.fout))
 
 
-    worksheet.write('A' + str(index_excel), res.type)
-    worksheet.write('B' + str(index_excel), res.aantal)
-    worksheet.write('C' + str(index_excel), res.juist)
-    worksheet.write('D' + str(index_excel), res.fout)
-    worksheet.write('E' + str(index_excel), res.falseNeg)
-    worksheet.write('F' + str(index_excel), res.falsePos)
+        worksheet.write('A' + str(index_excel), res.type)
+        worksheet.write('B' + str(index_excel), res.aantal)
+        worksheet.write('C' + str(index_excel), res.juist)
+        worksheet.write('D' + str(index_excel), res.fout)
+        worksheet.write('E' + str(index_excel), res.falseNeg)
+        worksheet.write('F' + str(index_excel), res.falsePos)
 
-    index_excel = index_excel + 1
+        index_excel = index_excel + 1
 
-# print('falsePos -> {}' ,falsePosTeller)
-# print('falseNeg -> {}' ,falseNegTeller)
-# print('juist -> {}' ,juist)
-# print('niet gevonden -> {}' ,nietGevonden)
+    # print('falsePos -> {}' ,falsePosTeller)
+    # print('falseNeg -> {}' ,falseNegTeller)
+    # print('juist -> {}' ,juist)
+    # print('niet gevonden -> {}' ,nietGevonden)
 
-workbook.close()
+    workbook.close()
+except:
+    print('problemen om te schrijven naar de exel file')
