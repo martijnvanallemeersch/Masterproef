@@ -4,6 +4,7 @@
 # last modified by Bolei Zhou, Dec.27, 2017 with latest pytorch and torchvision (upgrade your torchvision please if there is trn.Resize error)
 
 import torch
+import datetime
 from torch.autograd import Variable as V
 import torchvision.models as models
 from torchvision import transforms as trn
@@ -56,10 +57,16 @@ classes = tuple(classes)
 
 from os import listdir
 from os.path import isfile, join
-mypath = 'C:\\Users\\marti\\Documents\\Kuleuven\\Masterjaar\\Masterproef\\fotos-pieter\\fotos'
+mypath = 'C:\\Users\\marti\\Documents\\Kuleuven\\Masterjaar\\Masterproef\\fotos-pieter\\fotos\\BENLFR'
 onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
 
-workbook = xlsxwriter.Workbook('C:\\Users\\marti\\Desktop\\ResultatenRouteYou\\stat.xlsx')
+hour = datetime.datetime.now().hour
+minute = datetime.datetime.now().minute
+second = datetime.datetime.now().second
+
+date = datetime.datetime.now().date()
+
+workbook = xlsxwriter.Workbook('C:\\Users\\marti\\Desktop\\ResultatenRouteYou\\stat' + str(date) +'_' + str(hour)+str(minute)+str(second)+'.xlsx')
 worksheet = workbook.add_worksheet()
 worksheet.write('A1','Type')
 worksheet.write('B1','#')
@@ -86,6 +93,48 @@ GeneralTypeID_dict = {}
 POITypes = dict()
 Childs = dict()
 Parent = dict()
+
+
+RelatedWord = dict()
+
+church = ["synagoge", "mausoleum","tower"]
+castle = ["moat","canal","pond","palace","ruin","formal_garden"]
+palace = ["moat","canal","pond","castle","ruin","formal_garden"]
+bridge = ["canal","river","viaduct","aqueduct", "lock_chamber", "rope_bridge","moat","industrial_area"]
+street = ["crosswalk","plaza","alley"]
+crosswalk = ["street","plaza","alley"]
+park = ["forest_road","picnic_area","forest_pad","field/wild", "japanese_garden","botanical","garden/yard","rainforest","path/forest_path","vegetable_garden"]
+lawn = ["formal_garden","topiary_garden","botanical_garden","yard"]
+building = ["crosswalk","parking_garage","synagoge","hangar","farm","manufactured_home","burrough","patio","porch","museum"]
+house = ["oast_house"]
+square = ["fountain"]
+hotel_room = ["bedchamber","bedroom","youth_hostel"]
+bedchamber = ["hotel_room","bedroom","youth_hostel"]
+bedroom = ["bedchamber","hotel_room","youth_hostel"]
+youth_hostel = ["bedchamber","bedroom","hotel_room"]
+quest_room = ["bedchamber","bedroom","hotel_room","quest_room"]
+restaurant = ["dining_room","dining_hall","banquet_hall","sushi_bar","pizzeria"]
+orchard = ["field","path","garden"]
+
+RelatedWord["castle"] = castle
+RelatedWord["bridge"] = bridge
+RelatedWord["street"] = street
+RelatedWord["crosswalk"] = crosswalk
+RelatedWord["park"] = park
+RelatedWord["lawn"] = lawn
+RelatedWord["building"] = building
+RelatedWord["house"] = house
+RelatedWord["square"] = square
+RelatedWord["church"] = church
+RelatedWord["hotel_room"] = hotel_room
+RelatedWord["bedchamber"] = bedchamber
+RelatedWord["bedroom"] = bedroom
+RelatedWord["youth_hostel"] = youth_hostel
+RelatedWord["quest room"] = youth_hostel
+RelatedWord["restaurant"] = restaurant
+RelatedWord["orchard"] = orchard
+RelatedWord["palace"] = palace
+
 
 class resPlaces(object):
     def __init__(self, data,percentage):
@@ -162,14 +211,18 @@ def GenerateTreePOI():
     return
 
 def evaluate(resultPlaces):
+
+
+
+
+    for i in range(0, 5):
+
+        if(resultPlaces[i].percentage > 0.35):
+            if (resultPlaces[i].data != None):
+                return resultPlaces[i]
+
     perc = resultPlaces[0].percentage
     indexObjectNul = 0
-
-    if(perc > 0.35):
-        if (resultPlaces[0].data != None):
-            return resultPlaces[0]
-        else:
-            perc = 0
 
     objectNul = resultPlaces[indexObjectNul].data
     #if(objectNul != None):
@@ -193,7 +246,7 @@ def evaluate(resultPlaces):
                     indexObjectNul = indexObjectNul + 1
                     objectNul = resultPlaces[indexObjectNul].data
                     perc = resultPlaces[indexObjectNul].percentage
-                    if(indexObjectNul == 2):
+                    if(indexObjectNul == 4):
                         return -1
                     break
         else:
@@ -201,7 +254,7 @@ def evaluate(resultPlaces):
                 indexObjectNul = indexObjectNul + 1
                 objectNul = resultPlaces[indexObjectNul].data
                 perc = resultPlaces[indexObjectNul].percentage
-                if (indexObjectNul == 2):
+                if (indexObjectNul == 4):
                     return -1
                 break
         # else:
@@ -227,7 +280,7 @@ for file in onlyfiles:
     if(file.find(".jpeg") != -1 or file.find(".jpg") != -1 or file.find(".png") != -1):
 
         try:
-            img = Image.open('C:\\Users\\marti\\Documents\\Kuleuven\\Masterjaar\\Masterproef\\fotos-pieter\\fotos\\' + file)
+            img = Image.open(mypath + "\\" + file)
             input_img = V(centre_crop(img).unsqueeze(0))
 
             # forward pass
@@ -256,6 +309,7 @@ for file in onlyfiles:
             for i in range(0, 5):
                 print('{:.3f} -> {}'.format(probs[i], classes[idx[i]]))
 
+
             for i in range(0, 5):
 
                 result = result + "_" + classes[idx[i]]
@@ -265,7 +319,28 @@ for file in onlyfiles:
                 #voorlopig neem ik gewoon het eerste deel daarvan/ in de toekomst nog wijzigen
                 classes_split = classes[idx[i]].split("/")
 
-                resultPlaces.append(resPlaces(POITypes.get(GeneralTypeID_dict.get(classes_split[0])),float('{:.3f}'.format(probs[i]))))
+                percentage = float('{:.3f}'.format(probs[i]))
+
+                if(RelatedWord.get(classes_split[0]) != None):
+                    for related in RelatedWord.get(classes_split[0]):
+                        for index in range(0, 5):
+                            if(i != index):
+                                classes_split_intern = classes[idx[index]].split("/")
+
+                                if(classes_split_intern[0] == related):
+                                    percentage = percentage + float('{:.3f}'.format(probs[index]))
+
+
+                # speciale gevallen
+                if(classes_split[0] == "bedroom" or classes_split[0] == "hotel_room" or classes_split[0] == "youth_hostel" ):
+                    classes_split[0] = "quest room"
+                #############################################
+
+                #slecht geprogrammeerd omdat guest room hier harcoded staat maar lukt gelijk niet anders :(
+                if (str('quest room') == classes_split[0]):
+                    resultPlaces.append(resPlaces(POITypes.get(GeneralTypeID_dict.get("guest room")),percentage))
+                else:
+                    resultPlaces.append(resPlaces(POITypes.get(GeneralTypeID_dict.get(classes_split[0])),percentage))
 
             resEvaluate = evaluate(resultPlaces)
 
@@ -293,13 +368,23 @@ for file in onlyfiles:
                         klasse.append("Kathedraal")
                         klasse.append("Kapel")
                         klasse.append("POI")
+                        klasse.append("Erfgoed")
                         klasse.append("Foto-stopplaats")
-
+                        klasse.append("Historisch gebouw")
+                        klasse.append("Historische plaats")
+                        klasse.append("Historische dorp")
+                        klasse.append("Historische stad")
+                        klasse.append("Historische gebeurtenis")
 
                         falsePos.append("Huis")
                         falsePos.append("Gebouw")
                         falsePos.append("Herenhuis")
-                        falsePos.append("Historisch gebouw")
+                        falsePos.append("Kasteel")
+                        falsePos.append("Abdij")
+                        falsePos.append("Belfort")
+
+
+
                         falsePos.append("Burcht")
 
                         check = 1
@@ -309,13 +394,43 @@ for file in onlyfiles:
                         klasse.append("Kapel")
                         klasse.append("POI")
                         klasse.append("Foto-stopplaats")
-
+                        klasse.append("Erfgoed")
+                        klasse.append("Historisch gebouw")
+                        klasse.append("Historische plaats")
+                        klasse.append("Historische dorp")
+                        klasse.append("Historische stad")
+                        klasse.append("Historische gebeurtenis")
 
                         falsePos.append("Huis")
                         falsePos.append("Gebouw")
                         falsePos.append("Herenhuis")
-                        falsePos.append("Historisch gebouw")
                         falsePos.append("Burcht")
+                        falsePos.append("Kasteel")
+                        falsePos.append("Abdij")
+                        falsePos.append("Belfort")
+
+
+
+                        check = 1
+
+                    elif ((resEvaluate.data.data.find("synagoge") != -1)):
+                        klasse.append("Kerk")
+                        klasse.append("Kathedraal")
+                        klasse.append("Kapel")
+                        klasse.append("POI")
+                        klasse.append("Foto-stopplaats")
+                        klasse.append("Erfgoed")
+                        klasse.append("Historisch gebouw")
+                        klasse.append("Historische plaats")
+                        klasse.append("Historische dorp")
+                        klasse.append("Historische stad")
+                        klasse.append("Historische gebeurtenis")
+
+                        falsePos.append("Huis")
+                        falsePos.append("Gebouw")
+                        falsePos.append("Herenhuis")
+                        falsePos.append("Burcht")
+                        falsePos.append("Kasteel")
 
                         check = 1
 
@@ -336,6 +451,13 @@ for file in onlyfiles:
                         klasse.append("Kantoorgebouw")
                         klasse.append("POI")
                         klasse.append("Foto-stopplaats")
+                        klasse.append("Boerderij")
+                        klasse.append("Erfgoed")
+                        klasse.append("Historisch gebouw")
+                        klasse.append("Historische plaats")
+                        klasse.append("Historische dorp")
+                        klasse.append("Historische stad")
+                        klasse.append("Historische gebeurtenis")
 
                         falseNeg.append("Kerk")
                         falseNeg.append("Kathedraal")
@@ -350,9 +472,18 @@ for file in onlyfiles:
                         falseNeg.append("Museum")
                         falseNeg.append("School")
                         falseNeg.append("Voetbalstadion")
+                        falseNeg.append("Hotel")
+                        falseNeg.append("Hostel")
+                        falseNeg.append("Kasteel")
+                        falseNeg.append("Brouwerij")
+                        falseNeg.append("Hoeve")
+                        falseNeg.append("Landgoed")
+                        falseNeg.append("Klooster")
+                        falseNeg.append("Belfort")
+                        falseNeg.append("Hotel")
 
 
-
+                        falsePos.append("Plein")
 
 
                     elif (resEvaluate.data.data.find("house") != -1):
@@ -364,6 +495,13 @@ for file in onlyfiles:
                         klasse.append("Stadhuis")
                         klasse.append("POI")
                         klasse.append("Foto-stopplaats")
+                        klasse.append("Erfgoed")
+                        klasse.append("Historisch gebouw")
+                        klasse.append("Historische plaats")
+                        klasse.append("Historische dorp")
+                        klasse.append("Historische stad")
+                        klasse.append("Historische gebeurtenis")
+                        klasse.append("Hoeve")
 
                         falseNeg.append("Kerk")
                         falseNeg.append("Kathedraal")
@@ -376,6 +514,14 @@ for file in onlyfiles:
                         falseNeg.append("Architecturale plaats")
                         falseNeg.append("Begijnhof")
                         falseNeg.append("Museum")
+                        falseNeg.append("Hotel")
+                        falseNeg.append("Hostel")
+                        falseNeg.append("Brouwerij")
+                        falseNeg.append("Hotel")
+
+
+                        falsePos.append("Kasteel")
+
 
                     elif (resEvaluate.data.data.find("stadium") != -1):
 
@@ -384,12 +530,29 @@ for file in onlyfiles:
                         klasse.append("Foto-stopplaats")
 
                         check = 1
+
+                    elif (resEvaluate.data.data.find("windmill") != -1):
+
+                        klasse.append("Windmolen")
+                        klasse.append("POI")
+                        klasse.append("Foto-stopplaats")
+
+                        falsePos.append("Belfort")
+                        check = 1
+
                     elif (resEvaluate.data.data.find("castle") != -1):
                         klasse.append("Kasteel")
                         klasse.append("Burcht")
                         klasse.append("Vesting")
                         klasse.append("POI")
                         klasse.append("Foto-stopplaats")
+                        klasse.append("Erfgoed")
+                        klasse.append("Historisch gebouw")
+                        klasse.append("Historische plaats")
+                        klasse.append("Historische dorp")
+                        klasse.append("Historische stad")
+                        klasse.append("Historische gebeurtenis")
+                        klasse.append("Landgoed")
 
                         falsePos.append("Huis")
                         falsePos.append("Gebouw")
@@ -403,22 +566,34 @@ for file in onlyfiles:
                         klasse.append("Vesting")
                         klasse.append("POI")
                         klasse.append("Foto-stopplaats")
+                        klasse.append("Erfgoed")
+                        klasse.append("Historisch gebouw")
+                        klasse.append("Historische plaats")
+                        klasse.append("Historische dorp")
+                        klasse.append("Historische stad")
+                        klasse.append("Historische gebeurtenis")
+                        klasse.append("Landgoed")
 
+                        falsePos.append("Abdij")
                         falsePos.append("Huis")
                         falsePos.append("Gebouw")
                         falsePos.append("Herenhuis")
-                        falsePos.append("Historisch gebouw")
                         check = 1
 
                     elif (resEvaluate.data.data.find("tower")!= -1):
                         klasse.append("Belfort")
                         klasse.append("POI")
                         klasse.append("Foto-stopplaats")
+                        klasse.append("Erfgoed")
+                        klasse.append("Historisch gebouw")
+                        klasse.append("Historische plaats")
+                        klasse.append("Historische dorp")
+                        klasse.append("Historische stad")
+                        klasse.append("Historische gebeurtenis")
 
                         falsePos.append("Huis")
                         falsePos.append("Gebouw")
                         falsePos.append("Herenhuis")
-                        falsePos.append("Historisch gebouw")
 
                         falseNeg.append("Kathedraal")
                         falseNeg.append("Kerk")
@@ -446,10 +621,49 @@ for file in onlyfiles:
                         falseNeg.append("Burcht")
                         check = 1
 
+                    elif (resEvaluate.data.data.find("cemetery") != -1):
+                        klasse.append("Begraafplaats")
+                        klasse.append("Militaire begraafplaats")
+                        klasse.append("POI")
+                        klasse.append("Erfgoed")
+
+                        falsePos.append("Park")
+
+
+                        check = 1
+
+                    elif (resEvaluate.data.data.find("park") != -1):
+                        klasse.append("Park")
+                        klasse.append("POI")
+
+                        falseNeg.append("Bos")
+                        falseNeg.append("Begraafplaats")
+                        falseNeg.append("Militaire begraafplaats")
+
+                        check = 1
+
+                    elif (resEvaluate.data.data.find("guest room") != -1):
+                        klasse.append("Hotel")
+                        klasse.append("Hostel")
+                        klasse.append("POI")
+
+                        check = 1
+
+                    elif (resEvaluate.data.data.find("restaurant") != -1):
+                        klasse.append("POI")
+
+                        falseNeg.append("Hotel")
+                        check = 1
                     elif (resEvaluate.data.data.find("structure") != -1):
 
                         klasse.append("POI")
                         klasse.append("Foto-stopplaats")
+                        klasse.append("Erfgoed")
+                        klasse.append("Historisch gebouw")
+                        klasse.append("Historische plaats")
+                        klasse.append("Historische dorp")
+                        klasse.append("Historische stad")
+                        klasse.append("Historische gebeurtenis")
 
                         falseNeg.append("Brug")
                         falseNeg.append("Burcht")
@@ -461,6 +675,13 @@ for file in onlyfiles:
                         falseNeg.append("Vesting")
                         falseNeg.append("Kerk")
                         falseNeg.append("Kathedraal")
+                        falseNeg.append("Kasteel")
+                        falseNeg.append("Brouwerij")
+                        falseNeg.append("Windmolen")
+                        falseNeg.append("Klooster")
+                        falseNeg.append("Hotel")
+
+
                         falseNeg.append("Kapel")
                         falseNeg.append("Abdij")
                         falseNeg.append("Burcht")
@@ -469,9 +690,102 @@ for file in onlyfiles:
                         falseNeg.append("Cafe")
                         falseNeg.append("Architecturale plaats")
                         falseNeg.append("Belfort")
+                        falseNeg.append("Militaire begraafplaats")
+                        falseNeg.append("Boerderij")
+                        falseNeg.append("Hotel")
+                        falseNeg.append("Landgoed")
+
 
                         check = 1
 
+                    elif (resEvaluate.data.data.find("courtyard") != -1):
+
+                        klasse.append("POI")
+                        klasse.append("Foto-stopplaats")
+                        klasse.append("Erfgoed")
+                        klasse.append("Plein")
+                        klasse.append("Historisch gebouw")
+                        klasse.append("Historische plaats")
+                        klasse.append("Historische dorp")
+                        klasse.append("Historische stad")
+                        klasse.append("Historische gebeurtenis")
+
+                    elif (resEvaluate.data.data.find("square") != -1):
+
+                        klasse.append("POI")
+                        klasse.append("Foto-stopplaats")
+                        klasse.append("Erfgoed")
+                        klasse.append("Plein")
+                        klasse.append("Historisch gebouw")
+                        klasse.append("Historische plaats")
+                        klasse.append("Historische dorp")
+                        klasse.append("Historische stad")
+                        klasse.append("Historische gebeurtenis")
+
+                        falsePos.append("Hotel")
+
+                    elif (resEvaluate.data.data.find("park") != -1):
+
+                        klasse.append("Park")
+                        falseNeg.append("Boomgaard")
+                        falseNeg.append("Boom")
+                        falseNeg.append("Bos")
+
+                    elif (resEvaluate.data.data.find("orchard") != -1):
+
+                        klasse.append("Boomgaard")
+                        falseNeg.append("Park")
+                        falseNeg.append("Boom")
+                        falseNeg.append("Bos")
+
+                    elif (resEvaluate.data.data.find("landscape element") != -1):
+
+                        falseNeg.append("Boomgaard")
+                        falseNeg.append("Park")
+                        falseNeg.append("Boom")
+                        falseNeg.append("Bos")
+
+                    elif (resEvaluate.data.data.find("forest") != -1):
+
+                        klasse.append("Bos")
+                        falseNeg.append("Boomgaard")
+                        falseNeg.append("Park")
+                        falseNeg.append("Boom")
+
+                    elif (resEvaluate.data.data.find("path") != -1):
+
+                        falseNeg.append("Bos")
+                        falseNeg.append("Boomgaard")
+                        falseNeg.append("Park")
+                        falseNeg.append("Boom")
+
+                    elif (resEvaluate.data.data.find("swamp") != -1):
+
+                        falseNeg.append("Bos")
+                        falseNeg.append("Boomgaard")
+                        falseNeg.append("Park")
+                        falseNeg.append("Boom")
+
+                    elif (resEvaluate.data.data.find("garden") != -1):
+
+                        falseNeg.append("Bos")
+                        falseNeg.append("Boomgaard")
+                        falseNeg.append("Park")
+                        falseNeg.append("Boom")
+
+                        falsePos.append("Hotel")
+
+                    elif (resEvaluate.data.data.find("aquarium") != -1):
+
+                        klasse.append("Aquarium")
+                        falseNeg.append("Boomgaard")
+                        falseNeg.append("Park")
+                        falseNeg.append("Boom")
+
+                    elif (resEvaluate.data.data.find("swimmingpool") != -1):
+
+                        falsePos.append("Aquarium")
+                        falsePos.append("Hotel")
                     else:
                         klasse.append("POI")
                         klasse.append("Foto-stopplaats")
@@ -535,6 +849,14 @@ for file in onlyfiles:
                     if (nietGevondenCheck == 1):
                         resultDir = "nietGevonden"
 
+                        newpath = mypath + '\\' + resultDir + '\\' + resEvaluate.data.data + '\\'
+                        if not os.path.exists(newpath):
+                            os.makedirs(newpath)
+
+                        os.rename(
+                            mypath + '\\' + file,
+                            newpath + file)
+
                     if (juistCheck == 1):
                         resultDir = "juist"
 
@@ -547,19 +869,26 @@ for file in onlyfiles:
                     #         'C:\\Users\\marti\\Documents\\Kuleuven\\Masterjaar\\Masterproef\\fotos-pieter\\fotos\\' + file,
                     #         newpath + file)
 
-                    newpath = 'C:\\Users\\marti\\Documents\\Kuleuven\\Masterjaar\\Masterproef\\fotos-pieter\\fotos\\' + resultDir + '\\'
-                    if not os.path.exists(newpath):
-                        os.makedirs(newpath)
+                    if (nietGevondenCheck != 1):
+                        # newpath = mypath + '\\' + resultDir + '\\'
+                        # if not os.path.exists(newpath):
+                        #     os.makedirs(newpath)
+                        #
+                        # os.rename(
+                        #     mypath + '\\' + file,
+                        #     newpath + file)
 
-                    os.rename(
-                        'C:\\Users\\marti\\Documents\\Kuleuven\\Masterjaar\\Masterproef\\fotos-pieter\\fotos\\' + file,
-                        newpath + file)
+                        newpath = mypath + '\\' + resultDir + '\\' + resEvaluate.data.data + '\\'
+                        if not os.path.exists(newpath):
+                            os.makedirs(newpath)
+
+                        os.rename(
+                            mypath + '\\' + file,
+                            newpath + file)
 
 
                 else:
                     print('Errorr')
-
-
 
         except:
             print("Error met file " + file)
